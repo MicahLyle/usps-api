@@ -11,6 +11,17 @@ class USPSApiError(Exception):
     pass
 
 
+def replace_problematic_characters(xml_string: str) -> str:
+    """
+    Strip problematic characters from `xml string` that can cause request errors.
+    See https://github.com/BuluBox/usps-api/issues/6
+
+    One example: Kapaʻa is a city in Hawaii. Replacing the encoded "ʻ" ("&#699;")
+    back with "ʻ" provides correct validation results.
+    """
+    return xml_string.replace("&#699;", "ʻ")
+
+
 class USPSApi(object):
     BASE_URL = 'https://secure.shippingapis.com/ShippingAPI.dll?API='
     urls = {
@@ -32,6 +43,7 @@ class USPSApi(object):
         # The USPS developer guide says "ISO-8859-1 encoding is the expected character set for the request."
         # (see https://www.usps.com/business/web-tools-apis/general-api-developer-guide.htm)
         xml = etree.tostring(xml, encoding='iso-8859-1', pretty_print=self.test).decode()
+        xml = replace_problematic_characters(xml)
         url = self.get_url(action, xml)
         xml_response = requests.get(url).content
         response = json.loads(json.dumps(xmltodict.parse(xml_response)))
