@@ -63,8 +63,13 @@ class USPSApi(object):
 
 class AddressValidate(object):
 
-    def __init__(self, usps, address):
+    # NOTE: Added in `with_revision` from https://github.com/BuluBox/usps-api/pull/9/ on 05/29/2020 (before it was
+    # merged into the root `usps-api` repository. At the time of writing, it's only on `micahlyle`'s fork, starting at
+    # version `0.4.2` on that fork.
+    def __init__(self, usps, address, with_revision=False):
         xml = etree.Element('AddressValidateRequest', {'USERID': usps.api_user_id})
+        if with_revision:
+            etree.SubElement(xml, 'Revision').text = '1'
         _address = etree.SubElement(xml, 'Address', {'ID': '0'})
         address.add_to_xml(_address, prefix='', validate=True)
 
