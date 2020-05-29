@@ -6,3 +6,4 @@ usps_api.egg-info
 build
 dist
 .coverage
+.vscode
